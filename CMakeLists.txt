@@ -13,5 +13,11 @@ include_directories(
   vendor/glad/include
 )
 
-add_executable(gfx_lab main.cpp vendor/glad/src/glad.c)
+add_executable(gfx_lab
+  main.cpp 
+  vendor/glad/src/glad.c
+  assets/VertexBuffer.cpp
+  assets/IndexBuffer.cpp
+  assets/Common.cpp
+)
 target_link_libraries(gfx_lab glfw)

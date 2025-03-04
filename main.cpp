@@ -4,29 +4,12 @@
 #include <cmath>
 #include <string>
 #include <fstream>
-#include <cassert>
+
+#include "assets/Common.h"
+#include "assets/VertexBuffer.h"
+#include "assets/IndexBuffer.h"
 
 using namespace std;
-
-#define ASSERT(x) if(!(x)) assert(false);
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-static void GLClearError() {
-    while(glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-    while(GLenum error = glGetError()) {
-        cout << "(GL error) {"<< error << "}" << endl <<
-        "In file: " << file << endl <<
-        "Calling function: " << function << endl <<
-        "At line: " << line << endl;
-        return false;
-    }
-    return true;
-}
 
 static unsigned int CompileShader(unsigned int type, const std::string& source) {
 
@@ -102,19 +85,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-    /////////// new content
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // to control is it resizable or not
-    // glfwWindowHint(GLFW_SAMPLES, 0); // number of samples each pixel has for anti aliasing
-    // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-
-    // glfwWindowHint(GLFW_RED_BITS, 8);
-    // glfwWindowHint(GLFW_BLUE_BITS, 8);
-    // glfwWindowHint(GLFW_GREEN_BITS, 8);
-    // glfwWindowHint(GLFW_ALPHA_BITS, 8);
-
-    // glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
-    ///////////
 
     GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle!", nullptr, nullptr);
 
@@ -134,7 +105,7 @@ int main() {
     }
 
     float positions[] = {
-        -2.5f, -0.5f, // 0
+        -2.5f, -0.5f, // 0  
         -1.5f,  0.5f, // 1
         -1.5f, -0.5f, // 2
         -2.5f,  0.5f  // 3
@@ -146,21 +117,15 @@ int main() {
     };
 
     unsigned int vao;
-    // GLCall(glGenVertexArrays(1, &vao))
-    // GLCall(glBindVertexArray(vao))
+    GLCall(glGenVertexArrays(1, &vao))
+    GLCall(glBindVertexArray(vao))
 
-    unsigned int buffer;
-    GLCall(glGenBuffers(1, &buffer));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW));
+    VertexBuffer* vbo = new VertexBuffer(positions, 4 * 2 * sizeof(float));
 
     GLCall(glEnableVertexAttribArray(0));
     GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
-    unsigned int ibo;
-    GLCall(glGenBuffers(1, &ibo));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
+    IndexBuffer* ibo = new IndexBuffer(indices, 6);
 
     ifstream file("assets/shaders/simple.vert");
 	string vertexShader = string(istreambuf_iterator<char>(file), istreambuf_iterator<char>());
@@ -197,9 +162,11 @@ int main() {
     }
 
     glDeleteProgram(shader);
-    glDeleteBuffers(1, &buffer);
     glDeleteVertexArrays(1, &vao);
 
+    delete vbo;
+    delete ibo;
+    
     glfwDestroyWindow(window);
     glfwTerminate();
 
