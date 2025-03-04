@@ -4,8 +4,29 @@
 #include <cmath>
 #include <string>
 #include <fstream>
+#include <cassert>
 
 using namespace std;
+
+#define ASSERT(x) if(!(x)) assert(false);
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError() {
+    while(glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line) {
+    while(GLenum error = glGetError()) {
+        cout << "(GL error) {"<< error << "}" << endl <<
+        "In file: " << file << endl <<
+        "Calling function: " << function << endl <<
+        "At line: " << line << endl;
+        return false;
+    }
+    return true;
+}
 
 static unsigned int CompileShader(unsigned int type, const std::string& source) {
 
