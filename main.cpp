@@ -108,13 +108,15 @@ int main() {
     }
 
     float positions[] = {
-        -0.5f, -0.5f,
-         0.5f,  0.5f,
-         0.5f, -0.5f, 
+        -2.5f, -0.5f, // 0
+        -1.5f,  0.5f, // 1
+        -1.5f, -0.5f, // 2
+        -2.5f,  0.5f  // 3
+    };
 
-        -0.5f, -0.5f,
-         0.5f,  0.5f,
-        -0.5f,  0.5f
+    unsigned int indices[] = {
+        0, 1, 2,
+        0, 1, 3
     };
 
     unsigned int vao;
@@ -124,10 +126,15 @@ int main() {
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2* sizeof(float), positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
     ifstream file("assets/shaders/simple.vert");
 	string vertexShader = string(istreambuf_iterator<char>(file), istreambuf_iterator<char>());
@@ -143,12 +150,15 @@ int main() {
     // glBindVertexArray(vao);
 
     while(!glfwWindowShouldClose(window)) {
-        // glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
         
-        // glUseProgram(shader);
+        for(int i = 0; i < 8; i+=2) positions[i] += 0.01;
+        glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+
+        glUseProgram(shader);
         // glBindVertexArray(vao);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
