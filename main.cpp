@@ -146,21 +146,21 @@ int main() {
     };
 
     unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    // GLCall(glGenVertexArrays(1, &vao))
+    // GLCall(glBindVertexArray(vao))
 
     unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &buffer));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    GLCall(glEnableVertexAttribArray(0));
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    GLCall(glGenBuffers(1, &ibo));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
 
     ifstream file("assets/shaders/simple.vert");
 	string vertexShader = string(istreambuf_iterator<char>(file), istreambuf_iterator<char>());
@@ -169,28 +169,28 @@ int main() {
 	string fragmentShader = string(istreambuf_iterator<char>(file2), istreambuf_iterator<char>());
 
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
-    glUseProgram(shader);
+    GLCall(glUseProgram(shader))
 
-    int uColor = glGetUniformLocation(shader, "u_Color");
+    GLCall(int uColor = glGetUniformLocation(shader, "u_Color"));
     ASSERT(uColor != -1)
     float red = 0.0f, green = 0.0f, blue = 0.0f;
 
 
     while(!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT);
+        GLCall(glClear(GL_COLOR_BUFFER_BIT));
         
         for(int i = 0; i < 8; i+=2) positions[i] += 0.01;
-        glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+        GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW));
 
         increment(red, 0.01f);
         increment(green, 0.002f);
         increment(blue, 0.03f);
-        glUniform4f(uColor, red, green, blue, 1.0f);
+        GLCall(glUniform4f(uColor, red, green, blue, 1.0f));
 
-        glUseProgram(shader);
+        GLCall(glUseProgram(shader));
         // glBindVertexArray(vao);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         glfwSwapBuffers(window);
         glfwPollEvents();
