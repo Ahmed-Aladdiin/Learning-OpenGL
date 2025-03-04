@@ -62,7 +62,7 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragShader);
 
-    glAttachShader(program, vs);
+    glAttachShader(program, vs); // todo: better move it to the CompileShader function
     glAttachShader(program, fs);
 
     glLinkProgram(program);
@@ -85,6 +85,11 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     glDeleteShader(fs);
 
     return program;
+}
+
+void increment(float & num, float amount) {
+    num += amount;
+    if (num > 1.0f) num -= 1;
 }
 
 int main() {
@@ -166,15 +171,21 @@ int main() {
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
     glUseProgram(shader);
 
-    // unsigned int vao;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
+    int uColor = glGetUniformLocation(shader, "u_Color");
+    ASSERT(uColor != -1)
+    float red = 0.0f, green = 0.0f, blue = 0.0f;
+
 
     while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT);
         
         for(int i = 0; i < 8; i+=2) positions[i] += 0.01;
         glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+
+        increment(red, 0.01f);
+        increment(green, 0.002f);
+        increment(blue, 0.03f);
+        glUniform4f(uColor, red, green, blue, 1.0f);
 
         glUseProgram(shader);
         // glBindVertexArray(vao);
