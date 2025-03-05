@@ -19,5 +19,7 @@ add_executable(gfx_lab
   assets/VertexBuffer.cpp
   assets/IndexBuffer.cpp
   assets/Common.cpp
+  assets/VertexBufferLayout.cpp
+  assets/VertexArray.cpp
 )
 target_link_libraries(gfx_lab glfw)

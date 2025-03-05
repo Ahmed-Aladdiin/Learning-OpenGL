@@ -8,6 +8,8 @@
 #include "assets/Common.h"
 #include "assets/VertexBuffer.h"
 #include "assets/IndexBuffer.h"
+#include "assets/VertexBufferLayout.h"
+#include "assets/VertexArray.h"
 
 using namespace std;
 
@@ -71,7 +73,7 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
 }
 
 void increment(float & num, float amount) {
-    num += amount;
+    num += amount;  
     if (num > 1.0f) num -= 1;
 }
 
@@ -105,25 +107,25 @@ int main() {
     }
 
     float positions[] = {
-        -2.5f, -0.5f, // 0  
-        -1.5f,  0.5f, // 1
-        -1.5f, -0.5f, // 2
-        -2.5f,  0.5f  // 3
+        -0.5f, -0.5f, // 0  
+        0.5f,  0.5f, // 1
+        0.5f, -0.5f, // 2
+        -0.5f,  0.5f  // 3
     };
 
     unsigned int indices[] = {
         0, 1, 2,
         0, 1, 3
     };
+{
+    VertexArray vao; // vertex array object
 
-    unsigned int vao;
-    GLCall(glGenVertexArrays(1, &vao))
-    GLCall(glBindVertexArray(vao))
+    VertexBuffer vbo(positions, 4 * 2 * sizeof(float)); // vertex buffer object
 
-    VertexBuffer* vbo = new VertexBuffer(positions, 4 * 2 * sizeof(float));
+    VertexBufferLayout vlo; // vertex layout object
+    vlo.Push<float>(2);
 
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+    vao.AddBuffer(&vbo, &vlo);
 
     IndexBuffer* ibo = new IndexBuffer(indices, 6);
 
@@ -134,18 +136,23 @@ int main() {
 	string fragmentShader = string(istreambuf_iterator<char>(file2), istreambuf_iterator<char>());
 
     unsigned int shader = CreateShader(vertexShader, fragmentShader);
-    GLCall(glUseProgram(shader))
+    GLCall(glUseProgram(shader));
 
     GLCall(int uColor = glGetUniformLocation(shader, "u_Color"));
     ASSERT(uColor != -1)
     float red = 0.0f, green = 0.0f, blue = 0.0f;
+    GLCall(glUniform4f(uColor, red, green, blue, 1.0f));
 
+    // vao.Bind();
 
     while(!glfwWindowShouldClose(window)) {
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
         
         for(int i = 0; i < 8; i+=2) positions[i] += 0.01;
-        GLCall(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW));
+        // vbo.UnBind();
+        vbo.Update(positions, 4 * 2 * sizeof(float));
+        // GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+        // vao.AddBuffer(&vbo, &vlo);
 
         increment(red, 0.01f);
         increment(green, 0.002f);
@@ -153,7 +160,6 @@ int main() {
         GLCall(glUniform4f(uColor, red, green, blue, 1.0f));
 
         GLCall(glUseProgram(shader));
-        // glBindVertexArray(vao);
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
@@ -162,10 +168,12 @@ int main() {
     }
 
     glDeleteProgram(shader);
-    glDeleteVertexArrays(1, &vao);
 
-    delete vbo;
+    // delete vao;
+    // delete vbo;
+    // delete vlo;
     delete ibo;
+}
     
     glfwDestroyWindow(window);
     glfwTerminate();
