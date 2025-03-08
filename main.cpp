@@ -2,77 +2,17 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
-#include <string>
-#include <fstream>
 
 #include "assets/Common.h"
 #include "assets/VertexBuffer.h"
 #include "assets/IndexBuffer.h"
 #include "assets/VertexBufferLayout.h"
 #include "assets/VertexArray.h"
+#include "assets/Shaders.h"
 
 using namespace std;
 
-static unsigned int CompileShader(unsigned int type, const std::string& source) {
-
-    unsigned int id = glCreateShader(type); // create an id for the source
-    const char* src = source.c_str(); // get a pointer to the source code
-
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-
-    // TODO: check for errors
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    
-    if (result == GL_FALSE) {
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char* msg = (char*)alloca(length * sizeof(char));
-        glGetShaderInfoLog(id, length, &length, msg);
-        
-        std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment" ) << "Shader" << std::endl;
-        std::cout << msg << std::endl;
-
-        glDeleteShader(id);
-        return 0;
-    }
-
-    return id;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragShader) {
-
-    unsigned int program = glCreateProgram();
-    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragShader);
-
-    glAttachShader(program, vs); // todo: better move it to the CompileShader function
-    glAttachShader(program, fs);
-
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    // Check for validation errors
-    int validateStatus;
-    glGetProgramiv(program, GL_VALIDATE_STATUS, &validateStatus);
-    if (validateStatus == GL_FALSE) {
-        int length;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-        char* msg = (char*)alloca(length * sizeof(char));
-        glGetProgramInfoLog(program, length, &length, msg);
-        
-        std::cout << "Failed to validate program" << std::endl;
-        std::cout << msg << std::endl;
-    }
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
-
-void increment(float & num, float amount) {
+inline void increment(float & num, float amount) {
     num += amount;  
     if (num > 1.0f) num -= 1;
 }
@@ -107,10 +47,10 @@ int main() {
     }
 
     float positions[] = {
-        -0.5f, -0.5f, // 0  
-        0.5f,  0.5f, // 1
-        0.5f, -0.5f, // 2
-        -0.5f,  0.5f  // 3
+        -1.5f, -0.5f, // 0  
+        -0.5f,  0.5f, // 1
+        -0.5f, -0.5f, // 2
+        -1.5f,  0.5f  // 3
     };
 
     unsigned int indices[] = {
@@ -119,29 +59,18 @@ int main() {
     };
 {
     VertexArray vao; // vertex array object
-
     VertexBuffer vbo(positions, 4 * 2 * sizeof(float)); // vertex buffer object
-
     VertexBufferLayout vlo; // vertex layout object
     vlo.Push<float>(2);
-
     vao.AddBuffer(&vbo, &vlo);
 
     IndexBuffer* ibo = new IndexBuffer(indices, 6);
 
-    ifstream file("assets/shaders/simple.vert");
-	string vertexShader = string(istreambuf_iterator<char>(file), istreambuf_iterator<char>());
+    Shader shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
+    GLCall(shader.Bind());
 
-    ifstream file2("assets/shaders/simple.frag");
-	string fragmentShader = string(istreambuf_iterator<char>(file2), istreambuf_iterator<char>());
-
-    unsigned int shader = CreateShader(vertexShader, fragmentShader);
-    GLCall(glUseProgram(shader));
-
-    GLCall(int uColor = glGetUniformLocation(shader, "u_Color"));
-    ASSERT(uColor != -1)
     float red = 0.0f, green = 0.0f, blue = 0.0f;
-    GLCall(glUniform4f(uColor, red, green, blue, 1.0f));
+    GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
 
     // vao.Bind();
 
@@ -149,17 +78,14 @@ int main() {
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
         
         for(int i = 0; i < 8; i+=2) positions[i] += 0.01;
-        // vbo.UnBind();
         vbo.Update(positions, 4 * 2 * sizeof(float));
-        // GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
-        // vao.AddBuffer(&vbo, &vlo);
 
         increment(red, 0.01f);
         increment(green, 0.002f);
         increment(blue, 0.03f);
-        GLCall(glUniform4f(uColor, red, green, blue, 1.0f));
+        GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
 
-        GLCall(glUseProgram(shader));
+        GLCall(shader.Bind());
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
@@ -167,11 +93,6 @@ int main() {
         glfwPollEvents();
     }
 
-    glDeleteProgram(shader);
-
-    // delete vao;
-    // delete vbo;
-    // delete vlo;
     delete ibo;
 }
     

@@ -21,5 +21,6 @@ add_executable(gfx_lab
   assets/Common.cpp
   assets/VertexBufferLayout.cpp
   assets/VertexArray.cpp
+  assets/Shaders.cpp
 )
 target_link_libraries(gfx_lab glfw)
