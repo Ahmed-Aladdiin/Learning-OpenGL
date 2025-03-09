@@ -14,6 +14,7 @@ public:
   void UnBind();
 
   void setUniform4f(const std::string& uniformName, float r, float g, float b, float a);
+  void setUniform1i(const std::string& uniformName, int r);
 
 private:
   unsigned int CreateShader(const std::string vertexShader, const std::string fragShader);

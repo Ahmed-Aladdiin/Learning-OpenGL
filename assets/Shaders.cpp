@@ -41,6 +41,11 @@ void Shader::setUniform4f(const std::string &uniformName, float r, float g, floa
   glUniform4f(getUniform(uniformName), r, g, b, a);
 }
 
+void Shader::setUniform1i(const std::string &uniformName, int r)
+{
+  glUniform1i(getUniform(uniformName), r);
+}
+
 unsigned int Shader::CreateShader(const std::string vertexShader, const std::string fragShader)
 {
 
