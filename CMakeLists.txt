@@ -11,16 +11,20 @@ add_subdirectory(vendor/glfw)
 include_directories(
   vendor/glfw/include
   vendor/glad/include
+  vendor/stb/include
 )
 
 add_executable(gfx_lab
   main.cpp 
   vendor/glad/src/glad.c
+  vendor/stb/src/stb_image.cpp
   assets/VertexBuffer.cpp
   assets/IndexBuffer.cpp
   assets/Common.cpp
   assets/VertexBufferLayout.cpp
   assets/VertexArray.cpp
   assets/Shaders.cpp
+  assets/Renderer.cpp
+  assets/Texture.cpp
 )
 target_link_libraries(gfx_lab glfw)

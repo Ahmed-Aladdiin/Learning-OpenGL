@@ -9,6 +9,8 @@
 #include "assets/VertexBufferLayout.h"
 #include "assets/VertexArray.h"
 #include "assets/Shaders.h"
+#include "assets/Renderer.h"
+#include "assets/Texture.h"
 
 using namespace std;
 
@@ -29,7 +31,7 @@ int main() {
 
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle!", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(640, 640, "Hello Triangle!", nullptr, nullptr);
 
     if(!window) {
         std::cerr << "Failed to create Window" << std::endl;
@@ -47,10 +49,10 @@ int main() {
     }
 
     float positions[] = {
-        -1.5f, -0.5f, // 0  
-        -0.5f,  0.5f, // 1
-        -0.5f, -0.5f, // 2
-        -1.5f,  0.5f  // 3
+        -1.0f, -0.5f, 0.0f, 0.0f,// 0  
+         0.0f,  0.5f, 1.0f, 1.0f,// 1
+         0.0f, -0.5f, 1.0f, 0.0f,// 2
+        -1.0f,  0.5f, 0.0f, 1.0f// 3
     };
 
     unsigned int indices[] = {
@@ -59,35 +61,38 @@ int main() {
     };
 {
     VertexArray vao; // vertex array object
-    VertexBuffer vbo(positions, 4 * 2 * sizeof(float)); // vertex buffer object
+    VertexBuffer vbo(positions, 4 * 4 * sizeof(float)); // vertex buffer object
     VertexBufferLayout vlo; // vertex layout object
+    vlo.Push<float>(2);
     vlo.Push<float>(2);
     vao.AddBuffer(&vbo, &vlo);
 
     IndexBuffer* ibo = new IndexBuffer(indices, 6);
 
+    Texture texture("assets/textures/slime.png");
+    texture.Bind();
+
     Shader shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
     GLCall(shader.Bind());
+    shader.setUniform1i("u_Texture", 0);
 
-    float red = 0.0f, green = 0.0f, blue = 0.0f;
-    GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
+    // float red = 0.0f, green = 0.0f, blue = 0.0f;
+    // GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
 
-    // vao.Bind();
+    Renderer renderer; 
 
     while(!glfwWindowShouldClose(window)) {
-        GLCall(glClear(GL_COLOR_BUFFER_BIT));
-        
-        for(int i = 0; i < 8; i+=2) positions[i] += 0.01;
-        vbo.Update(positions, 4 * 2 * sizeof(float));
+        renderer.Clear();
 
-        increment(red, 0.01f);
-        increment(green, 0.002f);
-        increment(blue, 0.03f);
-        GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
+        for(int i = 0; i < 2*8; i+=4) positions[i] += 0.003;
+        vbo.Update(positions, 4 * 4 * sizeof(float));
 
-        GLCall(shader.Bind());
+        // increment(red, 0.01f);
+        // increment(green, 0.002f);
+        // increment(blue, 0.03f);
+        // GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
 
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        renderer.Draw(vao, *ibo, shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
