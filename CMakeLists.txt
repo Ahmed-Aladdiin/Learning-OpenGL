@@ -18,13 +18,13 @@ add_executable(gfx_lab
   main.cpp 
   vendor/glad/src/glad.c
   vendor/stb/src/stb_image.cpp
-  assets/VertexBuffer.cpp
-  assets/IndexBuffer.cpp
-  assets/Common.cpp
-  assets/VertexBufferLayout.cpp
-  assets/VertexArray.cpp
-  assets/Shaders.cpp
-  assets/Renderer.cpp
-  assets/Texture.cpp
+  src/VertexBuffer.cpp
+  src/IndexBuffer.cpp
+  src/Common.cpp
+  src/VertexBufferLayout.cpp
+  src/VertexArray.cpp
+  src/Shaders.cpp
+  src/Renderer.cpp
+  src/Texture.cpp
 )
 target_link_libraries(gfx_lab glfw)

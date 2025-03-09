@@ -3,14 +3,14 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 
-#include "assets/Common.h"
-#include "assets/VertexBuffer.h"
-#include "assets/IndexBuffer.h"
-#include "assets/VertexBufferLayout.h"
-#include "assets/VertexArray.h"
-#include "assets/Shaders.h"
-#include "assets/Renderer.h"
-#include "assets/Texture.h"
+#include "src/Common.h"
+#include "src/VertexBuffer.h"
+#include "src/IndexBuffer.h"
+#include "src/VertexBufferLayout.h"
+#include "src/VertexArray.h"
+#include "src/Shaders.h"
+#include "src/Renderer.h"
+#include "src/Texture.h"
 
 using namespace std;
 
