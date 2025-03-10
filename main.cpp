@@ -48,11 +48,18 @@ int main() {
         exit(1);
     }
 
-    float positions[] = {
-        -1.0f, -0.5f, 0.0f, 0.0f,// 0  
-         0.0f,  0.5f, 1.0f, 1.0f,// 1
-         0.0f, -0.5f, 1.0f, 0.0f,// 2
-        -1.0f,  0.5f, 0.0f, 1.0f// 3
+    float positionsBlock[] = {
+        -0.5f, -0.5f, 0.0f, 0.0f,// 0  
+         0.5f,  0.5f, 1.0f, 1.0f,// 1
+         0.5f, -0.5f, 1.0f, 0.0f,// 2
+        -0.5f,  0.5f, 0.0f, 1.0f// 3
+    };
+    
+    float positionsSlime[] = {
+        -1.5f, -0.5f, 0.0f, 0.0f,// 0  
+        -0.5f,  0.5f, 1.0f, 1.0f,// 1
+        -0.5f, -0.5f, 1.0f, 0.0f,// 2
+        -1.5f,  0.5f, 0.0f, 1.0f// 3
     };
 
     unsigned int indices[] = {
@@ -60,40 +67,49 @@ int main() {
         0, 1, 3
     };
 {
-    VertexArray vao; // vertex array object
-    VertexBuffer vbo(positions, 4 * 4 * sizeof(float)); // vertex buffer object
-    VertexBufferLayout vlo; // vertex layout object
-    vlo.Push<float>(2);
-    vlo.Push<float>(2);
-    vao.AddBuffer(&vbo, &vlo);
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+    // this is for the moving slime
+    VertexArray vaoSlime; // vertex array object
+    VertexBuffer vboSlime(positionsSlime, 4 * 4 * sizeof(float)); // vertex buffer object
+    VertexBufferLayout vloSlime; // vertex layout object
+    vloSlime.Push<float>(2);
+    vloSlime.Push<float>(2);
+    vaoSlime.AddBuffer(&vboSlime, &vloSlime);
+
+    // this is for the bloc
+    VertexArray vaoBlock; // vertex array object
+    VertexBuffer vboBlock(positionsBlock, 4 * 4 * sizeof(float)); // vertex buffer object
+    VertexBufferLayout vloBlock; // vertex layout object
+    vloBlock.Push<float>(2);
+    vloBlock.Push<float>(2);
+    vaoBlock.AddBuffer(&vboBlock, &vloBlock);
+
 
     IndexBuffer* ibo = new IndexBuffer(indices, 6);
 
-    Texture texture("assets/textures/slime.png");
-    texture.Bind();
+    Texture textureSlime("assets/textures/slime.png");
+    Texture textureBlock("assets/textures/block.png");
 
     Shader shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
-    GLCall(shader.Bind());
-    shader.setUniform1i("u_Texture", 0);
-
-    // float red = 0.0f, green = 0.0f, blue = 0.0f;
-    // GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
 
     Renderer renderer; 
 
     while(!glfwWindowShouldClose(window)) {
         renderer.Clear();
 
-        for(int i = 0; i < 2*8; i+=4) positions[i] += 0.003;
-        vbo.Update(positions, 4 * 4 * sizeof(float));
+        for(int i = 0; i < 2*8; i+=4) positionsSlime[i] += 0.003;
+        vboSlime.Update(positionsSlime, 4 * 4 * sizeof(float));
 
-        // increment(red, 0.01f);
-        // increment(green, 0.002f);
-        // increment(blue, 0.03f);
-        // GLCall(shader.setUniform4f("u_Color", red, green, blue, 1.0f));
+        textureBlock.Bind();
+        GLCall(renderer.Draw(vaoBlock, *ibo, shader, 0));
+        textureBlock.UnBind();
 
-        renderer.Draw(vao, *ibo, shader);
-
+        textureSlime.Bind(1);
+        GLCall(renderer.Draw(vaoSlime, *ibo, shader, 1));
+        textureSlime.UnBind();
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
