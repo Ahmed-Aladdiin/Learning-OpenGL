@@ -12,6 +12,6 @@ public:
   Renderer();
   ~Renderer();
 
-  void Draw(VertexArray& va, IndexBuffer& ib, Shader& shader);
+  void Draw(VertexArray& va, IndexBuffer& ib, Shader& shader, int slot);
   void Clear();
 };

@@ -25,7 +25,7 @@ void VertexArray::AddBuffer(VertexBuffer *vb, VertexBufferLayout *layout)
     GLCall(glVertexAttribPointer(i, element.count, element.type, element.isNormalized, layout->GetStride(), (void*) offset));
     offset += element.count * VertexBufferElement::GetElementSize(element.type);
   }
-  
+  UnBind();
 }
 
 void VertexArray::Bind()
