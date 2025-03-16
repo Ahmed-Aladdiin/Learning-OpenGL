@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <unordered_map>
+#include <glm.hpp>
 
 class Shader {
 private:
@@ -15,6 +16,7 @@ public:
 
   void setUniform4f(const std::string& uniformName, float r, float g, float b, float a);
   void setUniform1i(const std::string& uniformName, int r);
+  void setUniformMat4(const std::string &uniformName, glm::mat4 &mat);
 
 private:
   unsigned int CreateShader(const std::string vertexShader, const std::string fragShader);

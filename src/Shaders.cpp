@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <string>
 #include <fstream>
+#include <gtc/type_ptr.hpp>
 
 Shader::Shader(const std::string& vsPath, const std::string& fsPath)
 {
@@ -44,6 +45,11 @@ void Shader::setUniform4f(const std::string &uniformName, float r, float g, floa
 void Shader::setUniform1i(const std::string &uniformName, int r)
 {
   glUniform1i(getUniform(uniformName), r);
+}
+
+void Shader::setUniformMat4(const std::string &uniformName, glm::mat4 &mat)
+{
+  glUniformMatrix4fv(getUniform(uniformName), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 unsigned int Shader::CreateShader(const std::string vertexShader, const std::string fragShader)

@@ -3,6 +3,12 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtx/string_cast.hpp>
+
 #include "src/Common.h"
 #include "src/VertexBuffer.h"
 #include "src/IndexBuffer.h"
@@ -17,6 +23,18 @@ using namespace std;
 inline void increment(float & num, float amount) {
     num += amount;  
     if (num > 1.0f) num -= 1;
+}
+
+void printMat4(glm::mat4 mat) {
+    cout << glm::to_string(mat[0]) << endl;
+    cout << glm::to_string(mat[1]) << endl;
+    cout << glm::to_string(mat[2]) << endl;
+    cout << glm::to_string(mat[3]) << endl;
+}
+
+template <typename T>
+void printVec(T vec) {
+    cout << glm::to_string(vec) << endl;
 }
 
 int main() {
@@ -47,6 +65,22 @@ int main() {
         glfwTerminate();
         exit(1);
     }
+
+    /// this create a vector of 4 elements
+    // glm::vec4 vertex(1.0f, 5.0f, 1.0f, 1.0f);
+    /// this create and identity matrix of 4x4
+    // glm::mat4 model(1.0f);
+    /// lets create an scalling matrix
+    // glm::mat4 transform = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 4.0f, 0.5f));
+    /// performing rotation
+    // glm::mat4 transform = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1, 0, 0));
+    /// translation
+    // glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(1, -2, 0));
+
+
+    // printMat4(transform);
+    // printVec(transform * vertex);
+
 
     float pos = 0.0;
     float positionsBlock[] = {
@@ -89,6 +123,7 @@ int main() {
     vaoBlock.AddBuffer(&vboBlock, &vloBlock);
 
 
+
     IndexBuffer* ibo = new IndexBuffer(indices, 6);
 
     Texture textureSlime("assets/textures/slime.png");
@@ -98,17 +133,27 @@ int main() {
 
     Renderer renderer;
 
+
+    float distance = 0;
     while(!glfwWindowShouldClose(window)) {
         renderer.Clear();
+        distance += 0.003f;
 
-        for(int i = 0; i < 2*8; i+=4) positionsSlime[i] += 0.003;
-        vboSlime.Update(positionsSlime, 4 * 4 * sizeof(float));
+        
+        // for(int i = 0; i < 2*8; i+=4) positionsSlime[i] += 0.003;
+        // vboSlime.Update(positionsSlime, 4 * 4 * sizeof(float));
+        glm::mat4 I(1.0f);
+        shader.Bind();
+        shader.setUniformMat4("model", I);
 
         textureBlock.Bind();
         GLCall(renderer.Draw(vaoBlock, *ibo, shader, 0));
         textureBlock.UnBind();
 
         textureSlime.Bind(1);
+        shader.Bind();
+        glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(distance, 0, 0));
+        shader.setUniformMat4("model", translate);
         GLCall(renderer.Draw(vaoSlime, *ibo, shader, 1));
         textureSlime.UnBind();
         

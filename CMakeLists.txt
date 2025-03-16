@@ -12,6 +12,7 @@ include_directories(
   vendor/glfw/include
   vendor/glad/include
   vendor/stb/include
+  vendor/glm
 )
 
 add_executable(gfx_lab
