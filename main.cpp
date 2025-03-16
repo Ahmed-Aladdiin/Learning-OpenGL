@@ -51,17 +51,17 @@ int main() {
     float pos = 0.0;
     float positionsBlock[] = {
         -0.5f + pos, -0.5f, 0.0f, 0.0f,// 0  
-         0.5f + pos,  0.5f, 1.0f, 1.0f,// 1
-         0.5f + pos, -0.5f, 1.0f, 0.0f,// 2
-        -0.5f + pos,  0.5f, 0.0f, 1.0f// 3
+         0.5f + pos,  0.5f, 2.0f, 2.0f,// 1
+         0.5f + pos, -0.5f, 2.0f, 0.0f,// 2
+        -0.5f + pos,  0.5f, 0.0f, 2.0f// 3
     };
     
-    pos = -0.5f;
+    pos = -1.0f;
     float positionsSlime[] = {
         -0.5f + pos, -0.5f, 0.0f, 0.0f,// 0  
-         0.5f + pos,  0.5f, 1.0f, 1.0f,// 1
-         0.5f + pos, -0.5f, 1.0f, 0.0f,// 2
-        -0.5f + pos,  0.5f, 0.0f, 1.0f// 3
+         0.5f + pos,  0.5f, 2.0f, 2.0f,// 1
+         0.5f + pos, -0.5f, 2.0f, 0.0f,// 2
+        -0.5f + pos,  0.5f, 0.0f, 2.0f// 3
     };
 
     unsigned int indices[] = {
@@ -92,11 +92,11 @@ int main() {
     IndexBuffer* ibo = new IndexBuffer(indices, 6);
 
     Texture textureSlime("assets/textures/slime.png");
-    Texture textureBlock("assets/textures/block.png");
+    Texture textureBlock("assets/textures/oak.png");
 
     Shader shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
 
-    Renderer renderer; 
+    Renderer renderer;
 
     while(!glfwWindowShouldClose(window)) {
         renderer.Clear();

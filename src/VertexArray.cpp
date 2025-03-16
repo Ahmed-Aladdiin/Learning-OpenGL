@@ -21,8 +21,10 @@ void VertexArray::AddBuffer(VertexBuffer *vb, VertexBufferLayout *layout)
   unsigned int offset = 0;
   for (unsigned int i = 0; i < elements.size(); i++) {
     const auto& element = elements[i];
+
     GLCall(glEnableVertexAttribArray(i));
     GLCall(glVertexAttribPointer(i, element.count, element.type, element.isNormalized, layout->GetStride(), (void*) offset));
+    
     offset += element.count * VertexBufferElement::GetElementSize(element.type);
   }
   UnBind();
