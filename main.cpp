@@ -19,7 +19,8 @@ using namespace std;
 
 /// Global Variables
 float width = 640.0f, height = 480.0f;
-glm::mat4 model(1.0f);
+glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -1.0f));
+glm::mat4 rotation(1.0f);
 glm::mat4 perspective = glm::perspective(glm::radians(45.0f), width/height, 0.1f, 10.0f);
 glm::mat4 I(1.0f);
 EventHandler eventHandler;
@@ -27,22 +28,28 @@ EventHandler eventHandler;
 
 /// Functions
 void moveRight() {
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.03f, 0, 0)) * model;
+    translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.03f, 0, 0)) * translate;
 }
 void moveLeft() {
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(-0.03f, 0, 0)) * model;
+    translate = glm::translate(glm::mat4(1.0f), glm::vec3(-0.03f, 0, 0)) * translate;
 }
 void moveUp() {
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.03f, 0)) * model;
+    translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.03f, 0)) * translate;
 }
 void moveDown() {
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.03f, 0)) * model;
+    translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.03f, 0)) * translate;
 }
 void moveForward() {
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.03f)) * model;
+    translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.03f)) * translate;
 }
 void moveBackward() {
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.03f)) * model;
+    translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.03f)) * translate;
+}
+void rotateF() {
+    rotation = glm::rotate(rotation, glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+void rotateInv() {
+    rotation = glm::rotate(rotation, glm::radians(-5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 // Key callback function
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -105,10 +112,10 @@ int main() {
     
     pos = 0.0f;
     float positionsSlime[] = {
-        -0.5f + pos, -0.5f, 0.0f, 0.0f,// 0  
-         0.5f + pos,  0.5f, 2.0f, 2.0f,// 1
-         0.5f + pos, -0.5f, 2.0f, 0.0f,// 2
-        -0.5f + pos,  0.5f, 0.0f, 2.0f// 3
+        -0.5f + pos, -0.5f, 0.0f, 0.0f, 0.0f,// 0  
+         0.5f + pos,  0.5f, 0.0f, 2.0f, 2.0f,// 1
+         0.5f + pos, -0.5f, 0.0f, 2.0f, 0.0f,// 2
+        -0.5f + pos,  0.5f, 0.0f, 0.0f, 2.0f// 3
     };
 
     unsigned int indices[] = {
@@ -124,7 +131,7 @@ int main() {
     VertexArray vaoSlime; // vertex array object
     VertexBuffer vboSlime(positionsSlime, sizeof(positionsSlime)); // vertex buffer object
     VertexBufferLayout vloSlime; // vertex layout object
-    vloSlime.Push<float>(2);
+    vloSlime.Push<float>(3);
     vloSlime.Push<float>(2);
     vaoSlime.AddBuffer(&vboSlime, &vloSlime);
 
@@ -152,6 +159,8 @@ int main() {
     eventHandler.AddFunction('a', moveLeft);
     eventHandler.AddFunction('j', moveForward);
     eventHandler.AddFunction('k', moveBackward);
+    eventHandler.AddFunction('r', rotateF);
+    eventHandler.AddFunction('t', rotateInv);
 
     glfwSetKeyCallback(window, KeyCallback);
 
@@ -167,6 +176,7 @@ int main() {
 
         eventHandler.ExecuteFunctions();
 
+        glm::mat4 model = (rotation * translate);
         textureSlime.Bind(1);
         shader.Bind();
         shader.setUniformMat4("model", model);
