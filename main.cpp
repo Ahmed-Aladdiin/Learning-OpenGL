@@ -2,12 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
-
-
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
-#include <gtx/string_cast.hpp>
 
 #include "src/Common.h"
 #include "src/VertexBuffer.h"
@@ -17,24 +13,41 @@
 #include "src/Shaders.h"
 #include "src/Renderer.h"
 #include "src/Texture.h"
+#include "src/EventHandler.h"
 
 using namespace std;
 
-inline void increment(float & num, float amount) {
-    num += amount;  
-    if (num > 1.0f) num -= 1;
-}
+/// Global Variables
+float width = 640.0f, height = 480.0f;
+glm::mat4 model(1.0f);
+glm::mat4 perspective = glm::perspective(glm::radians(45.0f), width/height, 0.1f, 10.0f);
+glm::mat4 I(1.0f);
+EventHandler eventHandler;
 
-void printMat4(glm::mat4 mat) {
-    cout << glm::to_string(mat[0]) << endl;
-    cout << glm::to_string(mat[1]) << endl;
-    cout << glm::to_string(mat[2]) << endl;
-    cout << glm::to_string(mat[3]) << endl;
-}
 
-template <typename T>
-void printVec(T vec) {
-    cout << glm::to_string(vec) << endl;
+/// Functions
+void moveRight() {
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.03f, 0, 0)) * model;
+}
+void moveLeft() {
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(-0.03f, 0, 0)) * model;
+}
+void moveUp() {
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.03f, 0)) * model;
+}
+void moveDown() {
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.03f, 0)) * model;
+}
+void moveForward() {
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.03f)) * model;
+}
+void moveBackward() {
+    model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.03f)) * model;
+}
+// Key callback function
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+  eventHandler.KeyCallback(window, key, scancode, action, mods);
 }
 
 int main() {
@@ -49,7 +62,7 @@ int main() {
 
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(640, 640, "Hello Triangle!", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(width, height, "Hello Triangle!", nullptr, nullptr);
 
     if(!window) {
         std::cerr << "Failed to create Window" << std::endl;
@@ -84,13 +97,13 @@ int main() {
 
     float pos = 0.0;
     float positionsBlock[] = {
-        -0.5f + pos, -0.5f, 0.0f, 0.0f,// 0  
-         0.5f + pos,  0.5f, 2.0f, 2.0f,// 1
-         0.5f + pos, -0.5f, 2.0f, 0.0f,// 2
-        -0.5f + pos,  0.5f, 0.0f, 2.0f// 3
+        -0.5f + pos, -0.5f, -3.0f, 0.0f, 0.0f,// 0  
+         0.5f + pos,  0.5f, -3.0f, 2.0f, 2.0f,// 1
+         0.5f + pos, -0.5f, -3.0f, 2.0f, 0.0f,// 2
+        -0.5f + pos,  0.5f, -3.0f, 0.0f, 2.0f// 3
     };
     
-    pos = -1.0f;
+    pos = 0.0f;
     float positionsSlime[] = {
         -0.5f + pos, -0.5f, 0.0f, 0.0f,// 0  
          0.5f + pos,  0.5f, 2.0f, 2.0f,// 1
@@ -104,11 +117,12 @@ int main() {
     };
 {
     GLCall(glEnable(GL_BLEND));
+    GLCall(glEnable(GL_DEPTH_TEST));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     // this is for the moving slime
     VertexArray vaoSlime; // vertex array object
-    VertexBuffer vboSlime(positionsSlime, 4 * 4 * sizeof(float)); // vertex buffer object
+    VertexBuffer vboSlime(positionsSlime, sizeof(positionsSlime)); // vertex buffer object
     VertexBufferLayout vloSlime; // vertex layout object
     vloSlime.Push<float>(2);
     vloSlime.Push<float>(2);
@@ -116,12 +130,11 @@ int main() {
 
     // this is for the bloc
     VertexArray vaoBlock; // vertex array object
-    VertexBuffer vboBlock(positionsBlock, 4 * 4 * sizeof(float)); // vertex buffer object
+    VertexBuffer vboBlock(positionsBlock, sizeof(positionsBlock)); // vertex buffer object
     VertexBufferLayout vloBlock; // vertex layout object
-    vloBlock.Push<float>(2);
-    vloBlock.Push<float>(2);
+    vloBlock.Push<float>(3);
+    vloBlock.Push<float>(2);    
     vaoBlock.AddBuffer(&vboBlock, &vloBlock);
-
 
 
     IndexBuffer* ibo = new IndexBuffer(indices, 6);
@@ -133,16 +146,18 @@ int main() {
 
     Renderer renderer;
 
+    eventHandler.AddFunction('w', moveUp);
+    eventHandler.AddFunction('d', moveRight);
+    eventHandler.AddFunction('s', moveDown);
+    eventHandler.AddFunction('a', moveLeft);
+    eventHandler.AddFunction('j', moveForward);
+    eventHandler.AddFunction('k', moveBackward);
 
-    float distance = 0;
+    glfwSetKeyCallback(window, KeyCallback);
+
     while(!glfwWindowShouldClose(window)) {
         renderer.Clear();
-        distance += 0.003f;
-
         
-        // for(int i = 0; i < 2*8; i+=4) positionsSlime[i] += 0.003;
-        // vboSlime.Update(positionsSlime, 4 * 4 * sizeof(float));
-        glm::mat4 I(1.0f);
         shader.Bind();
         shader.setUniformMat4("model", I);
 
@@ -150,10 +165,12 @@ int main() {
         GLCall(renderer.Draw(vaoBlock, *ibo, shader, 0));
         textureBlock.UnBind();
 
+        eventHandler.ExecuteFunctions();
+
         textureSlime.Bind(1);
         shader.Bind();
-        glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(distance, 0, 0));
-        shader.setUniformMat4("model", translate);
+        shader.setUniformMat4("model", model);
+        shader.setUniformMat4("perspective", perspective);
         GLCall(renderer.Draw(vaoSlime, *ibo, shader, 1));
         textureSlime.UnBind();
         
