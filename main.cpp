@@ -18,7 +18,7 @@
 using namespace std;
 
 /// Global Variables
-float width = 640.0f, height = 480.0f;
+float width = 1280.0f, height = 720.0f;
 glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -1.0f));
 glm::mat4 rotation(1.0f);
 glm::mat4 perspective = glm::perspective(glm::radians(45.0f), width/height, 0.1f, 10.0f);
@@ -102,38 +102,74 @@ int main() {
     // printVec(transform * vertex);
 
 
-    float pos = 0.0;
+    // float positionsBlock[] = {
+    //     -0.5f + pos, -0.5f, -3.0f, 0.0f, 0.0f,// 0  
+    //      0.5f + pos,  0.5f, -3.0f, 2.0f, 2.0f,// 1
+    //      0.5f + pos, -0.5f, -3.0f, 2.0f, 0.0f,// 2
+    //     -0.5f + pos,  0.5f, -3.0f, 0.0f, 2.0f// 3
+    // };
+    
     float positionsBlock[] = {
-        -0.5f + pos, -0.5f, -3.0f, 0.0f, 0.0f,// 0  
-         0.5f + pos,  0.5f, -3.0f, 2.0f, 2.0f,// 1
-         0.5f + pos, -0.5f, -3.0f, 2.0f, 0.0f,// 2
-        -0.5f + pos,  0.5f, -3.0f, 0.0f, 2.0f// 3
+        // front face
+        -0.5f,  0.5f,  0.5f, 0.334f, 0.75f,// 0 // top left  
+         0.5f,  0.5f,  0.5f, 0.667f, 0.75f,// 1 // top right
+         0.5f, -0.5f,  0.5f, 0.667f, 0.5f,// 2  // bottom right
+        -0.5f, -0.5f,  0.5f, 0.334f, 0.5f,// 3  // bottom left
+
+        // back face
+        -0.5f,  0.5f, -0.5f, 0.334f, 0.0f,// 4 // top left  
+         0.5f,  0.5f, -0.5f, 0.667f, 0.0f,// 5 // top right
+         0.5f, -0.5f, -0.5f, 0.667f, 0.25f,// 6 // bottom right
+        -0.5f, -0.5f, -0.5f, 0.334f, 0.25f,// 7 // bottom left
+
+        // top face
+        -0.5f,  0.5f,  0.5f, 0.667f, 0.75f,// 8  // near right
+        -0.5f,  0.5f, -0.5f, 0.667f, 1.00f,// 9  // far right
+         0.5f,  0.5f,  0.5f, 0.334f, 0.75f,// 10 // near left
+         0.5f,  0.5f, -0.5f, 0.334f, 1.00f, // 11 // far left
+
+        // bottom face
+        -0.5f, -0.5f,  0.5f, 0.667f, 0.50f,// 12  // near right
+        -0.5f, -0.5f, -0.5f, 0.667f, 0.25f,// 13 // far right
+         0.5f, -0.5f,  0.5f, 0.334f, 0.50f,// 14 // near left
+         0.5f, -0.5f, -0.5f, 0.334f, 0.25f,// 15 // far left
+        
+        // right face
+         0.5f, -0.5f,  0.5f, 0.667f, 0.50f,// 16  // near bottom
+         0.5f,  0.5f,  0.5f, 0.667f, 0.75f,// 17  // near up
+         0.5f, -0.5f, -0.5f, 1.000f, 0.50f,// 18 // far  bottom
+         0.5f,  0.5f, -0.5f, 1.000f, 0.75f,// 19 // far  up
+        
+        // left face
+        -0.5f, -0.5f,  0.5f, 0.334f, 0.50f,// 20  // near bottom
+        -0.5f,  0.5f,  0.5f, 0.334f, 0.75f,// 21  // near up
+        -0.5f, -0.5f, -0.5f, 0.000f, 0.50f,// 22 // far  bottom
+        -0.5f,  0.5f, -0.5f, 0.000f, 0.75f // 23 // far  up
     };
     
-    pos = 0.0f;
-    float positionsSlime[] = {
-        -0.5f + pos, -0.5f, 0.0f, 0.0f, 0.0f,// 0  
-         0.5f + pos,  0.5f, 0.0f, 2.0f, 2.0f,// 1
-         0.5f + pos, -0.5f, 0.0f, 2.0f, 0.0f,// 2
-        -0.5f + pos,  0.5f, 0.0f, 0.0f, 2.0f// 3
-    };
-
     unsigned int indices[] = {
-        0, 1, 2,
-        0, 1, 3
+        0, 1, 2, // front face
+        0, 2, 3,
+
+        4, 5, 6, // back face
+        4, 6, 7,
+
+        8, 9, 11, // top side 
+        8, 11, 10,
+
+        12, 13, 15, // bottom face
+        12, 15, 14,
+
+        16, 17, 19, // right face
+        16, 19, 18,
+
+        20, 21, 23, // left face
+        20, 23, 22
     };
 {
     GLCall(glEnable(GL_BLEND));
     GLCall(glEnable(GL_DEPTH_TEST));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-
-    // this is for the moving slime
-    VertexArray vaoSlime; // vertex array object
-    VertexBuffer vboSlime(positionsSlime, sizeof(positionsSlime)); // vertex buffer object
-    VertexBufferLayout vloSlime; // vertex layout object
-    vloSlime.Push<float>(3);
-    vloSlime.Push<float>(2);
-    vaoSlime.AddBuffer(&vboSlime, &vloSlime);
 
     // this is for the bloc
     VertexArray vaoBlock; // vertex array object
@@ -144,10 +180,10 @@ int main() {
     vaoBlock.AddBuffer(&vboBlock, &vloBlock);
 
 
-    IndexBuffer* ibo = new IndexBuffer(indices, 6);
+    IndexBuffer* ibo = new IndexBuffer(indices, sizeof(indices)/sizeof(unsigned int));
 
-    Texture textureSlime("assets/textures/slime.png");
-    Texture textureBlock("assets/textures/oak.png");
+    // Texture textureSlime("assets/textures/slime.png");
+    Texture textureBlock("assets/textures/oak-texture.png");
 
     Shader shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
 
@@ -157,32 +193,34 @@ int main() {
     eventHandler.AddFunction('d', moveRight);
     eventHandler.AddFunction('s', moveDown);
     eventHandler.AddFunction('a', moveLeft);
-    eventHandler.AddFunction('j', moveForward);
-    eventHandler.AddFunction('k', moveBackward);
-    eventHandler.AddFunction('r', rotateF);
-    eventHandler.AddFunction('t', rotateInv);
+
+    eventHandler.AddFunction('e', moveForward);
+    eventHandler.AddFunction('q', moveBackward);
+
+    eventHandler.AddFunction('x', rotateF);
+    eventHandler.AddFunction('z', rotateInv);
 
     glfwSetKeyCallback(window, KeyCallback);
 
     while(!glfwWindowShouldClose(window)) {
         renderer.Clear();
         
-        shader.Bind();
-        shader.setUniformMat4("model", I);
+        // shader.Bind();
+        // shader.setUniformMat4("model", I);
 
-        textureBlock.Bind();
-        GLCall(renderer.Draw(vaoBlock, *ibo, shader, 0));
-        textureBlock.UnBind();
+        // textureBlock.Bind();
+        // GLCall(renderer.Draw(vaoBlock, *ibo, shader, 0));
+        // textureBlock.UnBind();
 
         eventHandler.ExecuteFunctions();
 
-        glm::mat4 model = (rotation * translate);
-        textureSlime.Bind(1);
+        glm::mat4 model = (translate * rotation);
+        textureBlock.Bind(1);
         shader.Bind();
         shader.setUniformMat4("model", model);
         shader.setUniformMat4("perspective", perspective);
-        GLCall(renderer.Draw(vaoSlime, *ibo, shader, 1));
-        textureSlime.UnBind();
+        GLCall(renderer.Draw(vaoBlock, *ibo, shader, 1));
+        textureBlock.UnBind();
         
         glfwSwapBuffers(window);
         glfwPollEvents();
