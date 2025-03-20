@@ -14,6 +14,7 @@
 #include "src/Renderer.h"
 #include "src/Texture.h"
 #include "src/EventHandler.h"
+#include "src/Camera.h"
 
 using namespace std;
 
@@ -45,11 +46,11 @@ void moveForward() {
 void moveBackward() {
     translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.03f)) * translate;
 }
-void rotateF() {
+void rotateY() {
     rotation = glm::rotate(rotation, glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 }
-void rotateInv() {
-    rotation = glm::rotate(rotation, glm::radians(-5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+void rotateX() {
+    rotation = glm::rotate(rotation, glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 }
 // Key callback function
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -188,17 +189,18 @@ int main() {
     Shader shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
 
     Renderer renderer;
+    Camera camera(glm::vec3(0, 0, 2), 0.1f, 100.0f, width, height);
 
-    eventHandler.AddFunction('w', moveUp);
-    eventHandler.AddFunction('d', moveRight);
-    eventHandler.AddFunction('s', moveDown);
-    eventHandler.AddFunction('a', moveLeft);
+    eventHandler.AddFunction(GLFW_KEY_W, moveUp);
+    eventHandler.AddFunction(GLFW_KEY_D, moveRight);
+    eventHandler.AddFunction(GLFW_KEY_S, moveDown);
+    eventHandler.AddFunction(GLFW_KEY_A, moveLeft);
 
-    eventHandler.AddFunction('e', moveForward);
-    eventHandler.AddFunction('q', moveBackward);
+    eventHandler.AddFunction(GLFW_KEY_E, moveForward);
+    eventHandler.AddFunction(GLFW_KEY_Q, moveBackward);
 
-    eventHandler.AddFunction('x', rotateF);
-    eventHandler.AddFunction('z', rotateInv);
+    eventHandler.AddFunction(GLFW_KEY_X, rotateY);
+    eventHandler.AddFunction(GLFW_KEY_Z, rotateX);
 
     glfwSetKeyCallback(window, KeyCallback);
 
@@ -213,11 +215,14 @@ int main() {
         // textureBlock.UnBind();
 
         eventHandler.ExecuteFunctions();
+        camera.Inputs(window);
 
         glm::mat4 model = (translate * rotation);
+        glm::mat4 view = camera.GetLookAtMat();
         textureBlock.Bind(1);
         shader.Bind();
         shader.setUniformMat4("model", model);
+        shader.setUniformMat4("view", view);
         shader.setUniformMat4("perspective", perspective);
         GLCall(renderer.Draw(vaoBlock, *ibo, shader, 1));
         textureBlock.UnBind();

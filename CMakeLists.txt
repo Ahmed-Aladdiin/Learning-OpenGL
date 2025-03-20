@@ -28,5 +28,6 @@ add_executable(gfx_lab
   src/Renderer.cpp
   src/Texture.cpp
   src/EventHandler.cpp
+  src/Camera.cpp
 )
 target_link_libraries(gfx_lab glfw)
