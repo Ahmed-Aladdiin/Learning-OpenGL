@@ -14,7 +14,6 @@ void Renderer::Draw(VertexArray &va, IndexBuffer &ib, Shader &shader, int slot)
   va.Bind();
   ib.Bind();
   shader.Bind();
-  shader.setUniform1i("u_Texture", slot);
   
   glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
 

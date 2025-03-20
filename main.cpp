@@ -22,8 +22,10 @@ using namespace std;
 float width = 1280.0f, height = 720.0f;
 glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -1.0f));
 glm::mat4 rotation(1.0f);
-glm::mat4 perspective = glm::perspective(glm::radians(45.0f), width/height, 0.1f, 10.0f);
+glm::mat4 perspective = glm::perspective(glm::radians(45.0f), width/height, 0.1f, 30.0f);
 glm::mat4 I(1.0f);
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
 EventHandler eventHandler;
 
 
@@ -86,66 +88,43 @@ int main() {
         glfwTerminate();
         exit(1);
     }
-
-    /// this create a vector of 4 elements
-    // glm::vec4 vertex(1.0f, 5.0f, 1.0f, 1.0f);
-    /// this create and identity matrix of 4x4
-    // glm::mat4 model(1.0f);
-    /// lets create an scalling matrix
-    // glm::mat4 transform = glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 4.0f, 0.5f));
-    /// performing rotation
-    // glm::mat4 transform = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1, 0, 0));
-    /// translation
-    // glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(1, -2, 0));
-
-
-    // printMat4(transform);
-    // printVec(transform * vertex);
-
-
-    // float positionsBlock[] = {
-    //     -0.5f + pos, -0.5f, -3.0f, 0.0f, 0.0f,// 0  
-    //      0.5f + pos,  0.5f, -3.0f, 2.0f, 2.0f,// 1
-    //      0.5f + pos, -0.5f, -3.0f, 2.0f, 0.0f,// 2
-    //     -0.5f + pos,  0.5f, -3.0f, 0.0f, 2.0f// 3
-    // };
     
     float positionsBlock[] = {
         // front face
-        -0.5f,  0.5f,  0.5f, 0.334f, 0.75f,// 0 // top left  
-         0.5f,  0.5f,  0.5f, 0.667f, 0.75f,// 1 // top right
-         0.5f, -0.5f,  0.5f, 0.667f, 0.5f,// 2  // bottom right
-        -0.5f, -0.5f,  0.5f, 0.334f, 0.5f,// 3  // bottom left
+        -0.5f,  0.5f,  0.5f,   0.334f, 0.75f,   0.0f, 0.0f, 1.0f,// 0 // top left  
+         0.5f,  0.5f,  0.5f,   0.667f, 0.75f,   0.0f, 0.0f, 1.0f,// 1 // top right
+         0.5f, -0.5f,  0.5f,   0.667f, 0.50f,   0.0f, 0.0f, 1.0f,// 2  // bottom right
+        -0.5f, -0.5f,  0.5f,   0.334f, 0.50f,   0.0f, 0.0f, 1.0f,// 3  // bottom left
 
         // back face
-        -0.5f,  0.5f, -0.5f, 0.334f, 0.0f,// 4 // top left  
-         0.5f,  0.5f, -0.5f, 0.667f, 0.0f,// 5 // top right
-         0.5f, -0.5f, -0.5f, 0.667f, 0.25f,// 6 // bottom right
-        -0.5f, -0.5f, -0.5f, 0.334f, 0.25f,// 7 // bottom left
+        -0.5f,  0.5f, -0.5f,   0.334f, 0.00f,   0.0f, 0.0f, -1.0f,  // 4 // top left  
+         0.5f,  0.5f, -0.5f,   0.667f, 0.00f,   0.0f, 0.0f, -1.0f,  // 5 // top right
+         0.5f, -0.5f, -0.5f,   0.667f, 0.25f,   0.0f, 0.0f, -1.0f,  // 6 // bottom right
+        -0.5f, -0.5f, -0.5f,   0.334f, 0.25f,   0.0f, 0.0f, -1.0f,  // 7 // bottom left
 
         // top face
-        -0.5f,  0.5f,  0.5f, 0.667f, 0.75f,// 8  // near right
-        -0.5f,  0.5f, -0.5f, 0.667f, 1.00f,// 9  // far right
-         0.5f,  0.5f,  0.5f, 0.334f, 0.75f,// 10 // near left
-         0.5f,  0.5f, -0.5f, 0.334f, 1.00f, // 11 // far left
+        -0.5f,  0.5f,  0.5f,   0.667f, 0.75f,   0.0f, 1.0f, 0.0f,// 8  // near right
+        -0.5f,  0.5f, -0.5f,   0.667f, 1.00f,   0.0f, 1.0f, 0.0f,// 9  // far right
+         0.5f,  0.5f,  0.5f,   0.334f, 0.75f,   0.0f, 1.0f, 0.0f,// 10 // near left
+         0.5f,  0.5f, -0.5f,   0.334f, 1.00f,   0.0f, 1.0f, 0.0f, // 11 // far left
 
         // bottom face
-        -0.5f, -0.5f,  0.5f, 0.667f, 0.50f,// 12  // near right
-        -0.5f, -0.5f, -0.5f, 0.667f, 0.25f,// 13 // far right
-         0.5f, -0.5f,  0.5f, 0.334f, 0.50f,// 14 // near left
-         0.5f, -0.5f, -0.5f, 0.334f, 0.25f,// 15 // far left
+        -0.5f, -0.5f,  0.5f,   0.667f, 0.50f,   0.0f, -1.0f, 0.0f,// 12  // near right
+        -0.5f, -0.5f, -0.5f,   0.667f, 0.25f,   0.0f, -1.0f, 0.0f,// 13 // far right
+         0.5f, -0.5f,  0.5f,   0.334f, 0.50f,   0.0f, -1.0f, 0.0f,// 14 // near left
+         0.5f, -0.5f, -0.5f,   0.334f, 0.25f,   0.0f, -1.0f, 0.0f,// 15 // far left
         
         // right face
-         0.5f, -0.5f,  0.5f, 0.667f, 0.50f,// 16  // near bottom
-         0.5f,  0.5f,  0.5f, 0.667f, 0.75f,// 17  // near up
-         0.5f, -0.5f, -0.5f, 1.000f, 0.50f,// 18 // far  bottom
-         0.5f,  0.5f, -0.5f, 1.000f, 0.75f,// 19 // far  up
+         0.5f, -0.5f,  0.5f,   0.667f, 0.50f,   1.0f, 0.0f, 0.0f,// 16  // near bottom
+         0.5f,  0.5f,  0.5f,   0.667f, 0.75f,   1.0f, 0.0f, 0.0f,// 17  // near up
+         0.5f, -0.5f, -0.5f,   1.000f, 0.50f,   1.0f, 0.0f, 0.0f,// 18 // far  bottom
+         0.5f,  0.5f, -0.5f,   1.000f, 0.75f,   1.0f, 0.0f, 0.0f,// 19 // far  up
         
         // left face
-        -0.5f, -0.5f,  0.5f, 0.334f, 0.50f,// 20  // near bottom
-        -0.5f,  0.5f,  0.5f, 0.334f, 0.75f,// 21  // near up
-        -0.5f, -0.5f, -0.5f, 0.000f, 0.50f,// 22 // far  bottom
-        -0.5f,  0.5f, -0.5f, 0.000f, 0.75f // 23 // far  up
+        -0.5f, -0.5f,  0.5f,   0.334f, 0.50f,   -1.0f, 0.0f, 0.0f,// 20  // near bottom
+        -0.5f,  0.5f,  0.5f,   0.334f, 0.75f,   -1.0f, 0.0f, 0.0f,// 21  // near up
+        -0.5f, -0.5f, -0.5f,   0.000f, 0.50f,   -1.0f, 0.0f, 0.0f,// 22 // far  bottom
+        -0.5f,  0.5f, -0.5f,   0.000f, 0.75f,   -1.0f, 0.0f, 0.0f// 23 // far  up
     };
     
     unsigned int indices[] = {
@@ -178,7 +157,22 @@ int main() {
     VertexBufferLayout vloBlock; // vertex layout object
     vloBlock.Push<float>(3);
     vloBlock.Push<float>(2);    
+    vloBlock.Push<float>(3);    
     vaoBlock.AddBuffer(&vboBlock, &vloBlock);
+
+    VertexArray vaoLight; // vertex array object
+    VertexBuffer vboLight(positionsBlock, sizeof(positionsBlock)); // vertex buffer object
+    VertexBufferLayout vloLight; // vertex layout object
+    vloLight.Push<float>(3);
+    vloLight.Push<float>(2);    
+    vloLight.Push<float>(3);
+    vaoLight.AddBuffer(&vboLight, &vloLight);
+
+    glm::mat4 lightModel(1.0f);
+    lightModel = glm::scale(lightModel, glm::vec3(0.5f,0.5f,0.5f));
+    lightModel = glm::translate(lightModel, glm::vec3(0, 2.5f, -0.75f));
+
+    glm::vec4 lightPos = lightModel * glm::vec4(0, 0, 0, 1);
 
 
     IndexBuffer* ibo = new IndexBuffer(indices, sizeof(indices)/sizeof(unsigned int));
@@ -186,7 +180,8 @@ int main() {
     // Texture textureSlime("assets/textures/slime.png");
     Texture textureBlock("assets/textures/oak-texture.png");
 
-    Shader shader("assets/shaders/simple.vert", "assets/shaders/simple.frag");
+    Shader shader("assets/shaders/block.vert", "assets/shaders/block.frag");
+    Shader lightShader("assets/shaders/light.vert", "assets/shaders/light.frag");
 
     Renderer renderer;
     Camera camera(glm::vec3(0, 0, 2), 0.1f, 100.0f, width, height);
@@ -206,26 +201,31 @@ int main() {
 
     while(!glfwWindowShouldClose(window)) {
         renderer.Clear();
-        
-        // shader.Bind();
-        // shader.setUniformMat4("model", I);
 
-        // textureBlock.Bind();
-        // GLCall(renderer.Draw(vaoBlock, *ibo, shader, 0));
-        // textureBlock.UnBind();
 
         eventHandler.ExecuteFunctions();
         camera.Inputs(window);
 
         glm::mat4 model = (translate * rotation);
         glm::mat4 view = camera.GetLookAtMat();
+
+        lightShader.Bind();
+        lightShader.setUniformMat4("model", lightModel);
+        lightShader.setUniformMat4("view", view);
+        lightShader.setUniformMat4("perspective", perspective);
+        lightShader.setUniform4f("u_lightColor", lightColor.x, lightColor.y, lightColor.z, 1.0f);
+        GLCall(renderer.Draw(vaoLight, *ibo, lightShader, 0));
+
         textureBlock.Bind(1);
         shader.Bind();
         shader.setUniformMat4("model", model);
         shader.setUniformMat4("view", view);
         shader.setUniformMat4("perspective", perspective);
+        shader.setUniform1i("u_Texture", 1);
+        shader.setUniform4f("u_lightColor", lightColor.x, lightColor.y, lightColor.z, 1.0f);
+        shader.setUniform3f("u_lightPos", lightPos.x, lightPos.y, lightPos.z);
         GLCall(renderer.Draw(vaoBlock, *ibo, shader, 1));
-        textureBlock.UnBind();
+        textureBlock.UnBind();  
         
         glfwSwapBuffers(window);
         glfwPollEvents();
